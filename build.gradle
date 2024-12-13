@@ -4,6 +4,7 @@ buildscript {
     }
     repositories {
         mavenLocal()
+        mavenCentral()
         maven { url "https://repo.grails.org/grails/core" }
     }
     dependencies {
@@ -12,100 +13,52 @@ buildscript {
 }
 
 plugins {
-    id "com.jfrog.bintray" version "1.6"
-    id "com.bertramlabs.asset-pipeline" version "2.8.1"
+    id "com.bertramlabs.asset-pipeline" version "5.0.4"
 }
 
-version "3.0.0"
+version "7.0.0"
 group "com.bertramlabs.plugins"
 
 apply plugin:"eclipse"
 apply plugin:"idea"
 apply plugin:"org.grails.grails-plugin"
-apply plugin:"org.grails.grails-plugin-publish"
 apply plugin:"org.grails.grails-gsp"
 
 
 
 ext {
     grailsVersion = project.grailsVersion
-    gradleWrapperVersion = project.gradleWrapperVersion
 }
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven { url "https://repo.grails.org/grails/core" }
 }
 
-dependencyManagement {
-    imports {
-        mavenBom "org.grails:grails-bom:$grailsVersion"
-    }
-    applyMavenExclusions false
-}
 
 dependencies {
-    provided 'org.springframework.boot:spring-boot-starter-logging'
-    provided "org.springframework.boot:spring-boot-starter-actuator"
-    provided "org.springframework.boot:spring-boot-autoconfigure"
-    provided "org.springframework.boot:spring-boot-starter-tomcat"
+    implementation 'org.springframework.boot:spring-boot-starter-logging'
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation "org.springframework.boot:spring-boot-autoconfigure"
+    implementation "org.springframework.boot:spring-boot-starter-tomcat"
 
-    provided "org.grails:grails-web-boot"
-    provided "org.grails:grails-dependencies"
-    compile "org.grails.plugins:asset-pipeline:3.2.0"
-    console "org.grails:grails-console"
+    implementation "org.grails:grails-web-boot"
+    implementation "org.grails:grails-dependencies"
+    implementation "com.bertramlabs.plugins:asset-pipeline-grails:5.0.4"
     profile "org.grails.profiles:web-plugin:3.1.5"
-    provided "org.grails:grails-plugin-services"
+    implementation "org.grails:grails-plugin-services"
 
-    provided "org.grails:grails-plugin-domain-class"
-    testCompile "org.grails:grails-plugin-testing"
-    testCompile "org.grails.plugins:geb"
-    testRuntime "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
-    testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
+    implementation "org.grails:grails-plugin-domain-class"
+    testImplementation "org.grails:grails-plugin-testing"
+    testImplementation "org.grails.plugins:geb"
+    testRuntimeOnly "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
+    testRuntimeOnly "net.sourceforge.htmlunit:htmlunit:2.18"
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = gradleWrapperVersion
-}
 
-eclipse {
-    classpath {
-        plusConfigurations += [configurations.provided]
-    }
-}
-
-idea {
-    module {
-        scopes.PROVIDED.plus += [configurations.provided]
-    }
-}
 
 assets {
     packagePlugin = true
 }
 
-bintray {
-    publications = ['maven']
-    pkg {
-        githubRepo = 'bertramdev/retina-tag-grails' //Optional Github repository
-        githubReleaseNotesFile = 'README.md' //Optional Github readme file
-        repo = 'grails3-plugins'
-        userOrg = 'bertramlabs'
-        licenses = ['Apache-2.0']
-    }
-}
-
-grailsPublish {
-    if(project.hasProperty('bintrayUser')) {
-        user = bintrayUser
-        key = bintrayKey
-    }
-    userOrg = 'bertramlabs'
-    githubSlug = 'bertramdev/retina-tag-grails'
-    license {
-        name = 'Apache-2.0'
-    }
-    title = "Retina Tag"
-    desc = "Adds retina resolution image tag support for asset-pipeline."
-    developers = [davydotcom: "David Estes"]
-}
