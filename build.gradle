@@ -1,61 +1,80 @@
 buildscript {
-    ext {
-        grailsVersion = project.grailsVersion
-    }
     repositories {
-        mavenLocal()
         mavenCentral()
-        maven { url "https://repo.grails.org/grails/core" }
+        maven { url "https://repo.grails.org/grails/restricted" }
+        maven {
+           url = 'https://repository.apache.org/content/groups/snapshots'
+           content {
+              includeVersionByRegex('org[.]apache[.](grails|groovy).*', '.*', '.*-SNAPSHOT')
+           }
+        }
     }
     dependencies {
-        classpath "org.grails:grails-gradle-plugin:$grailsVersion"
+        classpath platform("org.apache.grails:grails-bom:$grailsVersion")
+        classpath "org.apache.grails:grails-gradle-plugins"
+        classpath "cloud.wondrify:asset-pipeline-gradle"
     }
 }
 
-plugins {
-    id "com.bertramlabs.asset-pipeline" version "5.0.4"
-}
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'org.apache.grails.gradle.grails-publish'
+apply plugin: 'org.apache.grails.gradle.grails-plugin'
+apply plugin: 'java-library'
+apply plugin: "cloud.wondrify.asset-pipeline"
 
-version "7.0.0"
-group "com.bertramlabs.plugins"
-
-apply plugin:"eclipse"
-apply plugin:"idea"
-apply plugin:"org.grails.grails-plugin"
-apply plugin:"org.grails.grails-gsp"
-
-
+group "cloud.wondrify"
 
 ext {
-    grailsVersion = project.grailsVersion
+  pomDescription = 'retina-tag-grails is a grails plugin that injects taglib methods and auto javascript injection for handling hidpi graphic replacement.'
+  publishedProjects = [project.name]
 }
+
+configurations {
+    provided
+    doc.extendsFrom(runtime)
+}
+
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+        groovy.srcDirs += ['src/main/java']
+        java.srcDirs = []
+    }
+}
+
 
 repositories {
-    mavenLocal()
-    mavenCentral()
-    maven { url "https://repo.grails.org/grails/core" }
+  mavenLocal()
+  mavenCentral()
+  maven {
+    url = uri("https://central.sonatype.com/repository/maven-snapshots/")
+  }
 }
-
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-logging'
     implementation "org.springframework.boot:spring-boot-starter-actuator"
     implementation "org.springframework.boot:spring-boot-autoconfigure"
     implementation "org.springframework.boot:spring-boot-starter-tomcat"
-
-    implementation "org.grails:grails-web-boot"
-    implementation "org.grails:grails-dependencies"
-    implementation "com.bertramlabs.plugins:asset-pipeline-grails:5.0.4"
-    profile "org.grails.profiles:web-plugin:3.1.5"
-    implementation "org.grails:grails-plugin-services"
-
-    implementation "org.grails:grails-plugin-domain-class"
-    testImplementation "org.grails:grails-plugin-testing"
-    testImplementation "org.grails.plugins:geb"
-    testRuntimeOnly "org.seleniumhq.selenium:selenium-htmlunit-driver:2.47.1"
-    testRuntimeOnly "net.sourceforge.htmlunit:htmlunit:2.18"
+    implementation "org.apache.grails:grails-core"
+    implementation "org.apache.grails:grails-web-boot"
+    implementation "org.apache.grails:grails-databinding"
+    implementation "org.apache.grails:grails-services"
+    compileOnly 'org.apache.grails.views:grails-web-taglib' // For taglib compilation
+    implementation("cloud.wondrify:asset-pipeline-grails:5.0.26") 
+    implementation platform("org.apache.grails:grails-bom:$grailsVersion")
+    
+    testImplementation "org.apache.grails:grails-testing-support-datamapping"
+    testImplementation "org.mockito:mockito-core"
+    testImplementation "org.apache.grails:grails-testing-support-web"
 }
 
+
+apply {
+    from rootProject.layout.projectDirectory.file('gradle/java-config.gradle')
+    from rootProject.layout.projectDirectory.file('gradle/publish-config.gradle')
+}
 
 
 assets {
